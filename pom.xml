@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.jboss.pnc.rpm</groupId>
+  <artifactId>eap8-apache-sshd</artifactId> <!-- used as package name -->
+  <version>2.14.0</version> <!-- used as version -->
+  <packaging>rpm</packaging> <!-- Primary Artifact Configuration -->
+
+  <name>Apache Mina SSHD</name> <!-- used for "summary" field -->
+
+  <!-- used for "description" field -->
+  <description>
+  Apache SSHD is a 100% pure java library to support the SSH protocols on both the client and server side.
+  </description>
+
+  <url>https://github.com/apache/mina-sshd</url> <!-- used for URL field -->
+
+  <!--
+  Packager: Jens Reimann <http:/dentrassi.de>
+  Vendor: Jens Reimann
+  -->
+  <organization>
+    <name>Red Hat, Inc. &lt;http://bugzilla.redhat.com/bugzilla&gt;</name>
+    <url>Red Hat, Inc.</url>
+  </organization>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- For managing PGP Signing of RPM -->
+    <rpm.skipSigning>true</rpm.skipSigning> <!-- Primary Artifact Configuration(s) -->
+
+    <sshd>2.14.0</sshd>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.sshd</groupId>
+      <artifactId>sshd-common</artifactId>
+      <version>${sshd}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.sshd</groupId>
+                  <artifactId>sshd-common</artifactId>
+                  <version>${sshd}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}/dependencies/copy</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unpack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.sshd</groupId>
+                  <artifactId>apache-sshd</artifactId>
+                  <version>${sshd}</version>
+                  <classifier>src</classifier>
+                  <type>zip</type>
+                  <!-- In this case we only need the text files to add to the RPM -->
+                  <includes>**/*.txt,**/*.md</includes>
+                  <!-- <excludes>**/*test.class</excludes> -->
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}/dependencies/unpack</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Binds to phase package by default -->
+      <plugin>
+        <groupId>de.dentrassi.maven</groupId>
+        <artifactId>rpm</artifactId>
+        <version>1.11.0</version>
+        <!-- Tell MVN that the plugin has a packaging option -->
+        <extensions>true</extensions> <!-- Primary Artifact Configuration -->
+        <executions>
+          <execution>
+
+            <goals>
+              <goal>rpm</goal>
+            </goals>
+
+            <configuration>
+              <group>Development/Java</group> <!-- set RPM group -->
+              <release>1.redhat_00001.1.el9eap</release>
+
+              <!-- rule sets -->
+              <rulesets>
+                <ruleset>
+                  <id>defaultRuleset</id>
+                  <rules>
+                    <rule>
+                      <when>
+                        <type>directory</type>
+                      </when>
+                      <mode>0750</mode>
+                      <user>root</user>
+                      <group>root</group>
+                    </rule>
+                    <rule>
+                      <when>
+                        <type>file</type>
+                      </when>
+                      <mode>0644</mode>
+                      <user>root</user>
+                      <group>root</group>
+                    </rule>
+                  </rules>
+                </ruleset>
+              </rulesets>
+
+              <entries>
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/java/</name>
+                  <directory>false</directory>
+                  <collect>
+                    <from>${project.build.directory}/dependencies/copy</from>
+                    <directories>false</directories>
+                  </collect>
+                </entry>
+
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/java/sshd-common.jar</name>
+                  <linkTo>sshd-common-${sshd}.jar</linkTo>
+                </entry>
+
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/CHANGES.md</name>
+                  <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/CHANGES.md</file>
+                </entry>
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/README.md</name>
+                  <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/README.md</file>
+                </entry>
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/LICENSE.txt</name>
+                  <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/LICENSE.txt</file>
+                </entry>
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/NOTICE-bin.txt</name>
+                  <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/NOTICE-bin.txt</file>
+                </entry>
+                <entry>
+                  <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/NOTICE.txt</name>
+                  <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/NOTICE.txt</file>
+                </entry>
+
+              </entries>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
