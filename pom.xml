@@ -50,6 +50,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <version>3.8.1</version>
         <executions>
+          <!-- This execution handles the built dependent jars -->
           <execution>
             <id>copy</id>
             <phase>package</phase>
@@ -68,6 +69,7 @@
               <outputDirectory>${project.build.directory}/dependencies/copy</outputDirectory>
             </configuration>
           </execution>
+          <!-- This execution uses the extracted source to add e.g. README files to the RPM -->
           <execution>
             <id>unpack</id>
             <phase>package</phase>
@@ -146,11 +148,13 @@
                   </collect>
                 </entry>
 
+                <!-- Creates the symbolic link -->
                 <entry>
                   <name>/opt/rh/eap8/root/usr/share/java/sshd-common.jar</name>
                   <linkTo>sshd-common-${sshd}.jar</linkTo>
                 </entry>
 
+                <!-- Adds misc extra files -->
                 <entry>
                   <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/CHANGES.md</name>
                   <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/CHANGES.md</file>
