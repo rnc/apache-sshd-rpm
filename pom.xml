@@ -4,7 +4,7 @@
 
   <groupId>org.jboss.pnc.rpm</groupId>
   <artifactId>eap8-apache-sshd</artifactId> <!-- used as package name -->
-  <version>2.14.0-1</version> <!-- used as version -->
+  <version>2.14.0</version> <!-- used as version -->
   <packaging>rpm</packaging> <!-- Primary Artifact Configuration -->
 
   <name>Apache Mina SSHD</name> <!-- used for "summary" field -->
@@ -120,7 +120,8 @@
               <attach>true</attach>
               <group>Development/Java</group> <!-- set RPM group -->
               <!--- TODO: How to easily configure this? -->
-              <release>2.redhat_00002.1.el8eap</release>
+<!--              <release>2.redhat_00002.1.el8eap</release>-->
+              <release>2.1.el8eap</release>
 
               <!-- rule sets -->
               <rulesets>
@@ -188,8 +189,15 @@
                   <name>/opt/rh/eap8/root/usr/share/doc/eap8-apache-sshd/NOTICE.txt</name>
                   <file>${project.build.directory}/dependencies/unpack/apache-sshd-${sshd}/NOTICE.txt</file>
                 </entry>
-
               </entries>
+
+              <requires>
+                <require>eap8-runtime</require>
+              </requires>
+
+              <provides>
+                <provide>scl-package(eap8)</provide>
+              </provides>
             </configuration>
           </execution>
         </executions>
