@@ -119,8 +119,6 @@
             <configuration>
               <attach>true</attach>
               <group>Development/Java</group> <!-- set RPM group -->
-              <!--- TODO: How to easily configure this? -->
-<!--              <release>2.redhat_00002.1.el8eap</release>-->
               <release>2.1.el8eap</release>
 
               <!-- rule sets -->
